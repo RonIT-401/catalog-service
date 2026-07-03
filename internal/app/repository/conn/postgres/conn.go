@@ -66,7 +66,7 @@ func NewClient(ctx context.Context, cfg section.RepositoryPostgres) (*Client, er
 	defer cancel()
 
 	if err := sqlDB.PingContext(ctx); err != nil {
-		return nil, fmt.Errorf("ping Postgres error: %w", err)
+		return nil, fmt.Errorf("failed to ping PostgreSQL: %w: %w", err)
 	}
 
 	return &Client{
