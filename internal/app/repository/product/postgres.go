@@ -1,4 +1,4 @@
-package pcategory
+package pproduct
 
 import (
 	"context"
@@ -20,11 +20,11 @@ type (
 	_DB = rcpostgres.Client
 )
 
-func NewRepoFromPostgres(client *rcpostgres.Client) repository.Category {
+func NewRepoFromPostgres(client *rcpostgres.Client) repository.Product {
 	return &repoPg{_DB: client}
 }
 
-func (r *repoPg) Create(ctx context.Context, category entity.Category) error {
+func (r *repoPg) Create(ctx context.Context, category entity.Product) error {
 	_, err := r.NewInsert().
 		Model(&category).
 		Exec(ctx)
@@ -32,22 +32,22 @@ func (r *repoPg) Create(ctx context.Context, category entity.Category) error {
 	return err
 }
 
-func (r *repoPg) GetByGUIDs(ctx context.Context, guids []uuid.UUID) ([]entity.Category, error) {
+func (r *repoPg) GetByGUIDs(ctx context.Context, guids []uuid.UUID) ([]entity.Product, error) {
 	if len(guids) == 0 {
-		return []entity.Category{}, entity.ErrNotFound
+		return []entity.Product{}, entity.ErrNotFound
 	}
 
-	var categories []entity.Category
+	var products []entity.Product
 
 	err := r.NewSelect().
-		Model(&categories).
+		Model(&products).
 		Where("GUID IN (?)", bun.List(guids)).
 		Scan(ctx)
 
-	return categories, err
+	return products, err
 }
 
-func (r *repoPg) Update(ctx context.Context, category entity.Category) error {
+func (r *repoPg) Update(ctx context.Context, category entity.Product) error {
 	result, err := r.NewUpdate().
 		Model(&category).
 		WherePK().
@@ -59,21 +59,25 @@ func (r *repoPg) Update(ctx context.Context, category entity.Category) error {
 
 func (r *repoPg) Delete(ctx context.Context, guid uuid.UUID) error {
 	_, err := r.NewDelete().
-		Model(&entity.Category{GUID: &guid}).
+		Model(&entity.Product{GUID: &guid}).
 		WherePK().
 		Exec(ctx)
 
 	return rcpostgres.DeleteErr(err)
 }
 
-func (r *repoPg) List(ctx context.Context, name *string) ([]entity.Category, error) {
-	var categories []entity.Category
+func (r *repoPg) List(ctx context.Context, name *string, categoryGUID *uuid.UUID) ([]entity.Product, error) {
+	var products []entity.Product
 
 	query := r.NewSelect().
-		Model(&categories)
+		Model(&products)
 
 	if name != nil {
 		query = query.Where("name = ?", *name)
+	}
+
+	if categoryGUID != nil {
+		query = query.Where("category_guid = ?", *categoryGUID)
 	}
 
 	err := query.Scan(ctx)
@@ -81,6 +85,6 @@ func (r *repoPg) List(ctx context.Context, name *string) ([]entity.Category, err
 	if err != nil {
 		return nil, err
 	}
-	
-	return categories, nil
+
+	return products, nil
 }
