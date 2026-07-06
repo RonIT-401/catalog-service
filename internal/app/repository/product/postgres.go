@@ -59,7 +59,7 @@ func (r *repoPg) Update(ctx context.Context, category entity.Product) error {
 
 func (r *repoPg) Delete(ctx context.Context, guid uuid.UUID) error {
 	_, err := r.NewDelete().
-		Model(&entity.Product{GUID: &guid}).
+		Model(&entity.Product{GUID: guid}).
 		WherePK().
 		Exec(ctx)
 
