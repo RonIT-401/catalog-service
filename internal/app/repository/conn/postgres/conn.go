@@ -70,6 +70,7 @@ func NewClient(ctx context.Context, cfg section.RepositoryPostgres) (*Client, er
 	}
 
 	return &Client{
+		_bunDB:   bunDB,
 		rawBunDB: bunDB,
 		cfg:      cfg,
 	}, nil
