@@ -8,7 +8,6 @@ import (
 
 	"github.com/RonIT-401/catalog-service/internal/app/entity"
 	"github.com/RonIT-401/catalog-service/internal/app/repository"
-
 	rcpostgres "github.com/RonIT-401/catalog-service/internal/app/repository/conn/postgres"
 )
 
@@ -81,7 +80,6 @@ func (r *repoPg) List(ctx context.Context, name *string, categoryGUID *uuid.UUID
 	}
 
 	err := query.Scan(ctx)
-
 	if err != nil {
 		return nil, err
 	}
