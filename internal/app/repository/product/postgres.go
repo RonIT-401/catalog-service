@@ -23,9 +23,9 @@ func NewRepoFromPostgres(client *rcpostgres.Client) repository.Product {
 	return &repoPg{_DB: client}
 }
 
-func (r *repoPg) Create(ctx context.Context, category entity.Product) error {
+func (r *repoPg) Create(ctx context.Context, product entity.Product) error {
 	_, err := r.NewInsert().
-		Model(&category).
+		Model(&product).
 		Exec(ctx)
 
 	return err
@@ -33,7 +33,7 @@ func (r *repoPg) Create(ctx context.Context, category entity.Product) error {
 
 func (r *repoPg) GetByGUIDs(ctx context.Context, guids []uuid.UUID) ([]entity.Product, error) {
 	if len(guids) == 0 {
-		return []entity.Product{}, entity.ErrNotFound
+		return []entity.Product{}, nil
 	}
 
 	var products []entity.Product
@@ -46,9 +46,9 @@ func (r *repoPg) GetByGUIDs(ctx context.Context, guids []uuid.UUID) ([]entity.Pr
 	return products, err
 }
 
-func (r *repoPg) Update(ctx context.Context, category entity.Product) error {
+func (r *repoPg) Update(ctx context.Context, product entity.Product) error {
 	result, err := r.NewUpdate().
-		Model(&category).
+		Model(&product).
 		WherePK().
 		ExcludeColumn("id", "created_at").
 		Exec(ctx)

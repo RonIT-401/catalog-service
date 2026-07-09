@@ -33,7 +33,7 @@ func (r *repoPg) Create(ctx context.Context, category entity.Category) error {
 
 func (r *repoPg) GetByGUIDs(ctx context.Context, guids []uuid.UUID) ([]entity.Category, error) {
 	if len(guids) == 0 {
-		return []entity.Category{}, entity.ErrNotFound
+		return []entity.Category{}, nil
 	}
 
 	var categories []entity.Category
