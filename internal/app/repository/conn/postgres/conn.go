@@ -100,16 +100,16 @@ func (c *Client) Migrate(ctx context.Context) (oldVer, newVer int64, err error) 
 		return 0, 0, fmt.Errorf("failed to get applied migrations: %w", err)
 	}
 
+	if len(applied) > 0 {
+		oldVer, err = strconv.ParseInt(applied[len(applied)-1].Name, 10, 64)
+		if err != nil {
+			return 0, 0, fmt.Errorf("invalid old migration version %q: %w", applied[len(applied)-1], err)
+		}
+	}
+
 	group, err := m.Migrate(ctx)
 	if err != nil {
 		return 0, 0, fmt.Errorf("failed to migrate: %w", err)
-	}
-
-	if len(applied) > 0 {
-		oldVer, err = strconv.ParseInt(applied[0].Name, 10, 64)
-		if err != nil {
-			return 0, 0, fmt.Errorf("invalid old migration version %q: %w", applied[0].Name, err)
-		}
 	}
 
 	newVer = oldVer

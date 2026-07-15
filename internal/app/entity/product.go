@@ -43,19 +43,19 @@ func (r RequestProductCreate) Validate() error {
 type RequestProductUpdate struct {
 	Name         string    `json:"name"`
 	Description  *string   `json:"description"`
-	Price        int64     `json:"price"`
+	Price        *int64    `json:"price"`
 	CategoryGUID uuid.UUID `json:"category_guid"`
 }
 
 func (r RequestProductUpdate) Validate() error {
-	if r.Price <= 0 {
+	if r.Price != nil && *r.Price <= 0 {
 		return ErrIncorrectParameters
 	}
 	return nil
 }
 
 type RequestProductList struct {
-	CategoryGUID *uuid.UUID `json:"guid"`
+	CategoryGUID *uuid.UUID `json:"category_guid"`
 }
 
 type ResponseProductCreate struct {

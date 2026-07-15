@@ -122,7 +122,7 @@ func (s *srv) Delete(ctx context.Context, guid uuid.UUID) error {
 		return entity.ErrNotFound
 	}
 
-	return s.repoCategory.Delete(ctx, guid)
+	return s.repoProduct.Delete(ctx, guid)
 }
 
 func (s *srv) List(ctx context.Context, req entity.RequestProductList) ([]entity.Product, error) {
