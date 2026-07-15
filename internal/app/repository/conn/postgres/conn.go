@@ -103,7 +103,7 @@ func (c *Client) Migrate(ctx context.Context) (oldVer, newVer int64, err error) 
 	if len(applied) > 0 {
 		oldVer, err = strconv.ParseInt(applied[len(applied)-1].Name, 10, 64)
 		if err != nil {
-			return 0, 0, fmt.Errorf("invalid old migration version %q: %w", applied[len(applied)-1], err)
+			return 0, 0, fmt.Errorf("invalid old migration version %q: %w", applied[len(applied)-1].Name, err)
 		}
 	}
 

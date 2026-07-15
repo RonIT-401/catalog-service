@@ -40,9 +40,11 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := entity.ResponseProductCreate{
-		GUID:      product.GUID,
-		Name:      product.Name,
-		CreatedAt: product.CreatedAt,
+		GUID:         product.GUID,
+		Name:         product.Name,
+		Description:  product.Description,
+		CategoryGUID: product.CategoryGUID,
+		CreatedAt:    product.CreatedAt,
 	}
 
 	httph.SendJSON(w, http.StatusCreated, resp)
@@ -104,10 +106,7 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) List(w http.ResponseWriter, r *http.Request) {
 	var req entity.RequestProductList
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		httph.HandleError(w, entity.ErrIncorrectParameters)
-		return
-	}
+	_ = json.NewDecoder(r.Body).Decode(&req)
 
 	products, err := h.srv.List(r.Context(), req)
 	if err != nil {
