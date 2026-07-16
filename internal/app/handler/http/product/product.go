@@ -43,6 +43,7 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 		GUID:         product.GUID,
 		Name:         product.Name,
 		Description:  product.Description,
+		Price:        product.Price,
 		CategoryGUID: product.CategoryGUID,
 		CreatedAt:    product.CreatedAt,
 	}
