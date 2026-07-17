@@ -3,13 +3,13 @@ package hproduct
 import (
 	"net/http"
 
-	"github.com/RonIT-401/catalog-service/internal/pkg/http/binding"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
 
 	"github.com/RonIT-401/catalog-service/internal/app/entity"
 	rhandler "github.com/RonIT-401/catalog-service/internal/app/handler/http"
 	"github.com/RonIT-401/catalog-service/internal/app/service"
+	"github.com/RonIT-401/catalog-service/internal/pkg/http/binding"
 	"github.com/RonIT-401/catalog-service/internal/pkg/http/httph"
 )
 

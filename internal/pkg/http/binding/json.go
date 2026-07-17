@@ -1,7 +1,6 @@
 package binding
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/RonIT-401/catalog-service/internal/pkg/http/httph"
@@ -15,12 +14,22 @@ func (jsonBinding) Name() string {
 
 func (jsonBinding) Bind(req *http.Request, obj any) error {
 	if req == nil || req.Body == nil {
-		return errors.New("invalid request")
+		return &bindingError{
+			msg: "invalid request",
+		}
 	}
 
 	if err := httph.DecodeJSON(req, obj); err != nil {
-		return err
+		return &bindingError{
+			msg: err.Error(),
+		}
 	}
 
-	return validate(obj)
+	if err := validate(obj); err != nil {
+		return &bindingError{
+			msg: err.Error(),
+		}
+	}
+
+	return nil
 }

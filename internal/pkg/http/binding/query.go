@@ -17,10 +17,17 @@ func (queryBinding) Name() string {
 func (queryBinding) Bind(req *http.Request, obj any) error {
 	values := req.URL.Query()
 
-	err := formDecoder.Decode(obj, values)
-	if err != nil {
-		return err
+	if err := formDecoder.Decode(obj, values); err != nil {
+		return &bindingError{
+			msg: err.Error(),
+		}
 	}
 
-	return validate(obj)
+	if err := validate(obj); err != nil {
+		return &bindingError{
+			msg: err.Error(),
+		}
+	}
+
+	return nil
 }
