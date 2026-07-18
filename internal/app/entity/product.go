@@ -30,7 +30,7 @@ type RequestProductCreate struct {
 type RequestProductUpdate struct {
 	Name         string    `json:"name"`
 	Description  *string   `json:"description"`
-	Price        *int64    `json:"price" binding:"required,gt=0"`
+	Price        *int64    `json:"price" binding:"omitempty,gt=0"`
 	CategoryGUID uuid.UUID `json:"category_guid"`
 }
 
