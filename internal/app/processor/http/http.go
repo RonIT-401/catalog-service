@@ -32,16 +32,11 @@ func NewHTTP(
 	v1RegProductHandler(rV1, hProduct)
 
 	_ = r.Walk(func(route *mux.Route, _ *mux.Router, _ []*mux.Route) error {
-		path, err := route.GetPathTemplate()
-		if err != nil {
+		path, _ := route.GetPathTemplate()
+		methods, _ := route.GetMethods()
+		if path == "" || len(methods) == 0 {
 			return nil
 		}
-
-		methods, err := route.GetMethods()
-		if err != nil {
-			return nil
-		}
-
 		log.Printf("Route: %v %s", methods, path)
 		return nil
 	})

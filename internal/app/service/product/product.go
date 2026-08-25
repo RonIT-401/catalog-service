@@ -12,19 +12,19 @@ import (
 )
 
 type srv struct {
-	repoCategory repository.Category
 	repoProduct  repository.Product
+	repoCategory repository.Category
 }
 
 func NewService(repoProduct repository.Product, repoCategory repository.Category) service.Product {
 	return &srv{
-		repoCategory: repoCategory,
 		repoProduct:  repoProduct,
+		repoCategory: repoCategory,
 	}
 }
 
 func (s *srv) Create(ctx context.Context, req entity.RequestProductCreate) (entity.Product, error) {
-	existing, err := s.repoProduct.List(ctx, &req.Name, nil)
+	existing, err := s.repoProduct.List(ctx, &req.Name, nil, nil, nil)
 	if err != nil {
 		return entity.Product{}, err
 	}
@@ -32,12 +32,11 @@ func (s *srv) Create(ctx context.Context, req entity.RequestProductCreate) (enti
 		return entity.Product{}, entity.ErrAlreadyExists
 	}
 
-	category, err := s.repoCategory.GetByGUIDs(ctx, []uuid.UUID{req.CategoryGUID})
+	categories, err := s.repoCategory.GetByGUIDs(ctx, []uuid.UUID{req.CategoryGUID})
 	if err != nil {
 		return entity.Product{}, err
 	}
-
-	if len(category) == 0 {
+	if len(categories) == 0 {
 		return entity.Product{}, entity.ErrNotFound
 	}
 
@@ -68,38 +67,32 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestProd
 	if err != nil {
 		return entity.Product{}, err
 	}
-
 	if len(products) == 0 {
 		return entity.Product{}, entity.ErrNotFound
 	}
-
 	product := products[0]
 
 	if req.Name != "" {
-		list, err := s.repoProduct.List(ctx, &req.Name, nil)
+		existing, err := s.repoProduct.List(ctx, &req.Name, nil, nil, nil)
 		if err != nil {
 			return entity.Product{}, err
 		}
-
-		for _, p := range list {
-			if p.GUID != product.GUID {
+		for _, e := range existing {
+			if e.GUID != guid {
 				return entity.Product{}, entity.ErrAlreadyExists
 			}
 		}
-
 		product.Name = req.Name
 	}
 
-	if req.CategoryGUID != uuid.Nil {
+	if !req.CategoryGUID.IsNil() {
 		categories, err := s.repoCategory.GetByGUIDs(ctx, []uuid.UUID{req.CategoryGUID})
 		if err != nil {
 			return entity.Product{}, err
 		}
-
 		if len(categories) == 0 {
 			return entity.Product{}, entity.ErrNotFound
 		}
-
 		product.CategoryGUID = req.CategoryGUID
 	}
 
@@ -107,8 +100,8 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestProd
 		product.Description = req.Description
 	}
 
-	if req.Price != nil {
-		product.Price = *req.Price
+	if req.Price > 0 {
+		product.Price = req.Price
 	}
 
 	product.UpdatedAt = time.Now()
@@ -125,7 +118,6 @@ func (s *srv) Delete(ctx context.Context, guid uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-
 	if len(products) == 0 {
 		return entity.ErrNotFound
 	}
@@ -134,5 +126,5 @@ func (s *srv) Delete(ctx context.Context, guid uuid.UUID) error {
 }
 
 func (s *srv) List(ctx context.Context, req entity.RequestProductList) ([]entity.Product, error) {
-	return s.repoProduct.List(ctx, nil, req.CategoryGUID)
+	return s.repoProduct.List(ctx, nil, req.CategoryGUID, req.MinPrice, req.MaxPrice)
 }
