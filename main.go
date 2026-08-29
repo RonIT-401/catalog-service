@@ -36,20 +36,16 @@ func main() {
 		log.Printf("Database is up to date version=%d", newVer)
 	}
 
-	// Репозитории
 	categoryRepo := pcategory.NewRepoFromPostgres(pgClient)
 	productRepo := pproduct.NewRepoFromPostgres(pgClient)
 
-	// Сервисы
 	categorySvc := scategory.NewService(categoryRepo, productRepo)
 	productSvc := sproduct.NewService(productRepo, categoryRepo)
 
-	// Хендлеры
 	hHealth := rhealth.NewHandler()
 	hCategory := hcategory.NewHandler(categorySvc)
 	hProduct := hproduct.NewHandler(productSvc)
 
-	// HTTP-сервер
 	httpServer := rprocessor.NewHTTP(hHealth, hCategory, hProduct, cfg.Processor.WebServer)
 	if err := httpServer.Serve(); err != nil {
 		log.Fatalf("HTTP server failed: %v", err)

@@ -23,7 +23,6 @@ func NewHandler(srv service.Category) rhandler.Category {
 
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	var req entity.RequestCategoryCreate
-
 	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
 		httph.HandleError(w, err)
 		return
@@ -45,15 +44,13 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	guid, err := uuid.FromString(vars["guid"])
+	guid, err := uuid.FromString(mux.Vars(r)["guid"])
 	if err != nil {
 		httph.HandleError(w, entity.ErrIncorrectParameters)
 		return
 	}
 
 	var req entity.RequestCategoryUpdate
-
 	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
 		httph.HandleError(w, err)
 		return
@@ -76,8 +73,7 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	guid, err := uuid.FromString(vars["guid"])
+	guid, err := uuid.FromString(mux.Vars(r)["guid"])
 	if err != nil {
 		httph.HandleError(w, entity.ErrIncorrectParameters)
 		return
@@ -98,19 +94,16 @@ func (h *handler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items := make([]entity.ResponseCategoryListItem, 0, len(categories))
-
-	for _, category := range categories {
-		items = append(items, entity.ResponseCategoryListItem{
-			GUID:      category.GUID,
-			Name:      category.Name,
-			CreatedAt: category.CreatedAt,
-			UpdatedAt: category.UpdatedAt,
-		})
-	}
-
 	resp := entity.ResponseCategoryList{
-		Data: items,
+		Data: make([]entity.ResponseCategoryListItem, 0, len(categories)),
+	}
+	for _, c := range categories {
+		resp.Data = append(resp.Data, entity.ResponseCategoryListItem{
+			GUID:      c.GUID,
+			Name:      c.Name,
+			CreatedAt: c.CreatedAt,
+			UpdatedAt: c.UpdatedAt,
+		})
 	}
 
 	httph.SendJSON(w, http.StatusOK, resp)

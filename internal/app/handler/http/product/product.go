@@ -23,7 +23,6 @@ func NewHandler(srv service.Product) rhandler.Product {
 
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	var req entity.RequestProductCreate
-
 	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
 		httph.HandleError(w, err)
 		return
@@ -48,15 +47,13 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	guid, err := uuid.FromString(vars["guid"])
+	guid, err := uuid.FromString(mux.Vars(r)["guid"])
 	if err != nil {
 		httph.HandleError(w, entity.ErrIncorrectParameters)
 		return
 	}
 
 	var req entity.RequestProductUpdate
-
 	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
 		httph.HandleError(w, err)
 		return
@@ -82,8 +79,7 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	guid, err := uuid.FromString(vars["guid"])
+	guid, err := uuid.FromString(mux.Vars(r)["guid"])
 	if err != nil {
 		httph.HandleError(w, entity.ErrIncorrectParameters)
 		return
@@ -99,9 +95,11 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) List(w http.ResponseWriter, r *http.Request) {
 	var req entity.RequestProductList
-	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
-		httph.HandleError(w, err)
-		return
+	if r.Body != nil {
+		if err := binding.ScanAndValidateJSON(r, &req); err != nil {
+			httph.HandleError(w, err)
+			return
+		}
 	}
 
 	products, err := h.srv.List(r.Context(), req)
@@ -110,22 +108,19 @@ func (h *handler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items := make([]entity.ResponseProductListItem, 0, len(products))
-
-	for _, product := range products {
-		items = append(items, entity.ResponseProductListItem{
-			GUID:         product.GUID,
-			Name:         product.Name,
-			Description:  product.Description,
-			Price:        product.Price,
-			CategoryGUID: product.CategoryGUID,
-			CreatedAt:    product.CreatedAt,
-			UpdatedAt:    product.UpdatedAt,
-		})
-	}
-
 	resp := entity.ResponseProductList{
-		Data: items,
+		Data: make([]entity.ResponseProductListItem, 0, len(products)),
+	}
+	for _, p := range products {
+		resp.Data = append(resp.Data, entity.ResponseProductListItem{
+			GUID:         p.GUID,
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			CategoryGUID: p.CategoryGUID,
+			CreatedAt:    p.CreatedAt,
+			UpdatedAt:    p.UpdatedAt,
+		})
 	}
 
 	httph.SendJSON(w, http.StatusOK, resp)

@@ -18,8 +18,11 @@ type Config struct {
 var Root Config
 
 func Load() {
-	_ = godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		log.Printf("No .env file found: %v", err)
+	}
+
 	if err := envconfig.Process("APP", &Root); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to load config: %v", err)
 	}
 }

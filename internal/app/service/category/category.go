@@ -56,20 +56,17 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestCate
 	if err != nil {
 		return entity.Category{}, err
 	}
-
 	if len(categories) == 0 {
 		return entity.Category{}, entity.ErrNotFound
 	}
-
 	category := categories[0]
 
-	list, err := s.repoCategory.List(ctx, &req.Name)
+	existing, err := s.repoCategory.List(ctx, &req.Name)
 	if err != nil {
 		return entity.Category{}, err
 	}
-
-	for _, c := range list {
-		if c.GUID != category.GUID {
+	for _, e := range existing {
+		if e.GUID != guid {
 			return entity.Category{}, entity.ErrAlreadyExists
 		}
 	}
@@ -89,17 +86,15 @@ func (s *srv) Delete(ctx context.Context, guid uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-
 	if len(categories) == 0 {
 		return entity.ErrNotFound
 	}
 
-	list, err := s.repoProduct.List(ctx, nil, &guid)
+	products, err := s.repoProduct.List(ctx, nil, &guid, nil, nil)
 	if err != nil {
 		return err
 	}
-
-	if len(list) > 0 {
+	if len(products) > 0 {
 		return entity.ErrCategoryHasProducts
 	}
 
