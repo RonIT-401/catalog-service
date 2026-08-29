@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"net/url"
 	"strconv"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
@@ -46,7 +46,7 @@ func NewClient(ctx context.Context, cfg section.RepositoryPostgres) (*Client, er
 
 	dsn := u.String()
 
-	log.Printf("Initializing PostgreSQL connection read_timeout=%s write_timeout=%s", cfg.ReadTimeout, cfg.WriteTimeout)
+	log.Info().Str("read_timeout", cfg.ReadTimeout.String()).Str("write_timeout", cfg.WriteTimeout.String()).Msg("Initializing PostgreSQL connection")
 
 	connector := pgdriver.NewConnector(
 		pgdriver.WithDSN(dsn),
@@ -66,7 +66,7 @@ func NewClient(ctx context.Context, cfg section.RepositoryPostgres) (*Client, er
 		return nil, fmt.Errorf("failed to ping PostgreSQL: %w", err)
 	}
 
-	log.Printf("PostgreSQL connection established")
+	log.Info().Msg("PostgreSQL connection established")
 
 	return &Client{
 		_bunDB:   bunDB,

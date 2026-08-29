@@ -2,10 +2,10 @@ package rprocessor
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/zerolog/log"
 
 	"github.com/RonIT-401/catalog-service/internal/app/config/section"
 	rhandler "github.com/RonIT-401/catalog-service/internal/app/handler/http"
@@ -37,7 +37,7 @@ func NewHTTP(
 		if path == "" || len(methods) == 0 {
 			return nil
 		}
-		log.Printf("Route: %v %s", methods, path)
+		log.Info().Strs("methods", methods).Str("path", path).Msg("Route")
 		return nil
 	})
 
@@ -49,6 +49,6 @@ func NewHTTP(
 }
 
 func (p *httpProc) Serve() error {
-	log.Printf("Starting HTTP server on %s", p.addr)
+	log.Info().Str("addr", p.addr).Msg("Starting HTTP server")
 	return p.server.ListenAndServe()
 }
