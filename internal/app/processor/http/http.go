@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/RonIT-401/catalog-service/internal/app/util"
-	"github.com/RonIT-401/catalog-service/internal/pkg/http/httph"
-	"github.com/RonIT-401/catalog-service/internal/pkg/http/mzerolog"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
 
 	"github.com/RonIT-401/catalog-service/internal/app/config/section"
 	rhandler "github.com/RonIT-401/catalog-service/internal/app/handler/http"
+	"github.com/RonIT-401/catalog-service/internal/app/util"
+	"github.com/RonIT-401/catalog-service/internal/pkg/http/httph"
+	"github.com/RonIT-401/catalog-service/internal/pkg/http/mzerolog"
 )
 
 type httpProc struct {
