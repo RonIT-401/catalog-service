@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/RonIT-401/catalog-service/internal/app/util"
+	"github.com/RonIT-401/catalog-service/internal/pkg/http/httph"
+	"github.com/RonIT-401/catalog-service/internal/pkg/http/mzerolog"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
 
@@ -24,6 +27,13 @@ func NewHTTP(
 ) *httpProc {
 	r := mux.NewRouter()
 	r.NotFoundHandler = http.HandlerFunc(handlerNotFound)
+
+	r.Use(
+		httph.NewErrorMiddleware(),
+		mzerolog.NewMiddleware(
+			mzerolog.WithSkipper(util.IsFilteredHttpRoute),
+		),
+	)
 
 	vGenericRegHealthCheck(r, hHealth)
 
