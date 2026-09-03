@@ -91,13 +91,13 @@ func (b *Builder) BuildRepoConnMigrator() {
 func (b *Builder) BuildRepoCategory() {
 	b.exec(func(b *Builder) {
 		b.categoryRepo = pcategory.NewRepoFromPostgres(b.connPostgres)
-	}, b.categoryRepo)
+	}, b.connPostgres)
 }
 
 func (b *Builder) BuildRepoProduct() {
 	b.exec(func(b *Builder) {
 		b.productRepo = pproduct.NewRepoFromPostgres(b.connPostgres)
-	}, b.productRepo)
+	}, b.connPostgres)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
