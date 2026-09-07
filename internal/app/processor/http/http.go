@@ -77,5 +77,5 @@ func (p *httpProc) StartAsync(ctx context.Context, wg *sync.WaitGroup) {
 	go p.serve(l)
 
 	processor.WatchForShutdown(ctx, wg, processor.CloserFunc(l.Close))
-	processor.WatchForShutdown(ctx, wg, processor.NewCloserContextFunc(p.server.Shutdown, ctx, time.Second*5))
+	processor.WatchForShutdown(ctx, wg, processor.NewCloserContextFunc(p.server.Shutdown, context.Background(), time.Second*5))
 }
