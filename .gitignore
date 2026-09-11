@@ -21,6 +21,7 @@ vendor/
 
 # Coverage
 coverage.out
+coverage.html
 
 # macOS
 .DS_Store
