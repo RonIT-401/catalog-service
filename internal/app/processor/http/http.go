@@ -72,10 +72,12 @@ func (p *httpProc) StartAsync(ctx context.Context, wg *sync.WaitGroup) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start listener")
 	}
-	log.Info().Msg("HTTP listener started")
+	log.Info().Msgf("HTTP listener started on %s", p.addr)
 
 	go p.serve(l)
 
 	processor.WatchForShutdown(ctx, wg, processor.CloserFunc(l.Close))
 	processor.WatchForShutdown(ctx, wg, processor.NewCloserContextFunc(p.server.Shutdown, context.Background(), time.Second*5))
 }
+
+// 93b92698-40dd-4f68-aa08-9511385d1ccd
