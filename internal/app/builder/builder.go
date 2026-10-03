@@ -13,11 +13,14 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/RonIT-401/catalog-service/internal/app/config"
+	ghcatalogv1 "github.com/RonIT-401/catalog-service/internal/app/handler/grpc/catalog/v1"
 	rhandler "github.com/RonIT-401/catalog-service/internal/app/handler/http"
 	hcategory "github.com/RonIT-401/catalog-service/internal/app/handler/http/category"
 	rhealth "github.com/RonIT-401/catalog-service/internal/app/handler/http/health"
 	hproduct "github.com/RonIT-401/catalog-service/internal/app/handler/http/product"
 	"github.com/RonIT-401/catalog-service/internal/app/processor"
+	pgateway "github.com/RonIT-401/catalog-service/internal/app/processor/gateway"
+	pgrpc "github.com/RonIT-401/catalog-service/internal/app/processor/grpc"
 	rprocessor "github.com/RonIT-401/catalog-service/internal/app/processor/http"
 	pprocessor "github.com/RonIT-401/catalog-service/internal/app/processor/other"
 	"github.com/RonIT-401/catalog-service/internal/app/repository"
@@ -27,6 +30,7 @@ import (
 	"github.com/RonIT-401/catalog-service/internal/app/service"
 	scategory "github.com/RonIT-401/catalog-service/internal/app/service/category"
 	sproduct "github.com/RonIT-401/catalog-service/internal/app/service/product"
+	catalogv1 "github.com/RonIT-401/catalog-service/internal/pkg/grpc/gen/catalog/v1"
 )
 
 type Builder struct {
@@ -45,9 +49,10 @@ type Builder struct {
 	categoryService service.Category
 	productService  service.Product
 
-	healthHandler   rhandler.Health
-	categoryHandler rhandler.Category
-	productHandler  rhandler.Product
+	healthHandler    rhandler.Health
+	categoryHandler  rhandler.Category
+	productHandler   rhandler.Product
+	catalogV1Handler catalogv1.CatalogServiceServer
 
 	processors []processor.Processor
 }
@@ -172,6 +177,13 @@ func (b *Builder) BuildHandlerHttpProduct() {
 	}, b.productService)
 }
 
+func (b *Builder) BuildHandlerGrpcCatalogV1() {
+	b.exec(func(b *Builder) {
+		handler := ghcatalogv1.NewHandler(b.productService)
+		b.catalogV1Handler = handler
+	}, b.productService)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///// PROCESSORS ///////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,6 +195,28 @@ func (b *Builder) BuildProcHttp() {
 
 		b.processors = append(b.processors, httpProcessor)
 	}, b.healthHandler)
+}
+
+func (b *Builder) BuildProcGrpc() {
+	b.exec(func(b *Builder) {
+		processor := pgrpc.NewGRPC(
+			b.catalogV1Handler,
+			b.cfg.Processor.Grpc,
+		)
+
+		b.processors = append(b.processors, processor)
+	}, b.catalogV1Handler)
+}
+
+func (b *Builder) BuildProcGateway() {
+	b.exec(func(b *Builder) {
+		processor := pgateway.NewGateway(
+			b.cfg.Processor.Gateway,
+			b.cfg.Processor.Grpc,
+		)
+
+		b.processors = append(b.processors, processor)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////
