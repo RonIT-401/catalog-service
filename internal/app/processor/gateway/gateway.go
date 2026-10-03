@@ -92,6 +92,6 @@ func (p *gatewayProc) StartAsync(ctx context.Context, wg *sync.WaitGroup) {
 	processor.WatchForShutdown(
 		ctx,
 		wg,
-		processor.NewCloserContextFunc(p.server.Shutdown, ctx, gatewayShutdownTimeout),
+		processor.NewCloserContextFunc(p.server.Shutdown, context.Background(), gatewayShutdownTimeout),
 	)
 }
