@@ -12,6 +12,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+	otelmux "go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 
 	"github.com/RonIT-401/catalog-service/internal/app/config"
 	"github.com/RonIT-401/catalog-service/internal/app/constant"
@@ -36,7 +37,6 @@ import (
 	"github.com/RonIT-401/catalog-service/internal/app/util"
 	catalogv1 "github.com/RonIT-401/catalog-service/internal/pkg/grpc/gen/catalog/v1"
 	"github.com/RonIT-401/catalog-service/internal/pkg/http/httph"
-	otelmux "go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 )
 
 type Builder struct {
@@ -178,7 +178,6 @@ func (b *Builder) BuildMonitorOpenTelemetry() {
 
 	b.exec(func(b *Builder) {
 		proc, err := monitor.NewOpenTelemetryController(b.ctx, b.cfg.Monitor.Environment, cfg)
-
 		if err != nil {
 			b.err = fmt.Errorf("init OpenTelemetry: %w", err)
 			return

@@ -56,13 +56,11 @@ func NewOpenTelemetryController(
 	}
 
 	res, err := resource.New(ctx, resource.WithAttributes(attrs...))
-
 	if err != nil {
 		return nil, fmt.Errorf("create resource: %w", err)
 	}
 
 	conn, err := grpc.NewClient(cfg.Address, grpc.WithTransportCredentials(insecure.NewCredentials()))
-
 	if err != nil {
 		return nil, fmt.Errorf("create gRPC client: %w", err)
 	}
@@ -75,9 +73,8 @@ func NewOpenTelemetryController(
 	p.conn = conn
 
 	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
-
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("create OTLP exporter: %w", err)
 	}
 

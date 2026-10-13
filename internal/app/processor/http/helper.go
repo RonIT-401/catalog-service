@@ -3,8 +3,9 @@ package rprocessor
 import (
 	"net/http"
 
-	"github.com/RonIT-401/catalog-service/internal/pkg/http/httph"
 	"github.com/gorilla/mux"
+
+	"github.com/RonIT-401/catalog-service/internal/pkg/http/httph"
 )
 
 func reg(r *mux.Router, method, path string, handler http.Handler) {
