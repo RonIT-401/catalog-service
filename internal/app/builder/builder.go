@@ -3,6 +3,7 @@ package builder
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"reflect"
@@ -13,6 +14,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/RonIT-401/catalog-service/internal/app/config"
+	"github.com/RonIT-401/catalog-service/internal/app/constant"
 	ghcatalogv1 "github.com/RonIT-401/catalog-service/internal/app/handler/grpc/catalog/v1"
 	rhandler "github.com/RonIT-401/catalog-service/internal/app/handler/http"
 	hcategory "github.com/RonIT-401/catalog-service/internal/app/handler/http/category"
@@ -22,6 +24,7 @@ import (
 	pgateway "github.com/RonIT-401/catalog-service/internal/app/processor/gateway"
 	pgrpc "github.com/RonIT-401/catalog-service/internal/app/processor/grpc"
 	rprocessor "github.com/RonIT-401/catalog-service/internal/app/processor/http"
+	"github.com/RonIT-401/catalog-service/internal/app/processor/monitor"
 	pprocessor "github.com/RonIT-401/catalog-service/internal/app/processor/other"
 	"github.com/RonIT-401/catalog-service/internal/app/repository"
 	pcategory "github.com/RonIT-401/catalog-service/internal/app/repository/category"
@@ -30,7 +33,10 @@ import (
 	"github.com/RonIT-401/catalog-service/internal/app/service"
 	scategory "github.com/RonIT-401/catalog-service/internal/app/service/category"
 	sproduct "github.com/RonIT-401/catalog-service/internal/app/service/product"
+	"github.com/RonIT-401/catalog-service/internal/app/util"
 	catalogv1 "github.com/RonIT-401/catalog-service/internal/pkg/grpc/gen/catalog/v1"
+	"github.com/RonIT-401/catalog-service/internal/pkg/http/httph"
+	otelmux "go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 )
 
 type Builder struct {
@@ -53,6 +59,8 @@ type Builder struct {
 	categoryHandler  rhandler.Category
 	productHandler   rhandler.Product
 	catalogV1Handler catalogv1.CatalogServiceServer
+
+	middlewares []httph.Middleware
 
 	processors []processor.Processor
 }
@@ -161,6 +169,29 @@ func (b *Builder) BuildServiceProduct() {
 	}, b.productRepo, b.categoryRepo)
 }
 
+func (b *Builder) BuildMonitorOpenTelemetry() {
+	cfg := b.cfg.Monitor.OpenTelemetry
+	if !cfg.Enabled {
+		log.Warn().Msg("OpenTelemetry is disabled by config")
+		return
+	}
+
+	b.exec(func(b *Builder) {
+		proc, err := monitor.NewOpenTelemetryController(b.ctx, b.cfg.Monitor.Environment, cfg)
+
+		if err != nil {
+			b.err = fmt.Errorf("init OpenTelemetry: %w", err)
+			return
+		}
+
+		b.processors = append(b.processors, proc)
+		b.middlewares = append(b.middlewares, otelmux.Middleware(
+			constant.AppName,
+			otelmux.WithFilter(func(r *http.Request) bool { return !util.IsFilteredHttpRoute(r) }),
+		))
+	})
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///// HANDLERS /////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,7 +222,7 @@ func (b *Builder) BuildHandlerGrpcCatalogV1() {
 func (b *Builder) BuildProcHttp() {
 	b.exec(func(b *Builder) {
 		httpProcessor := rprocessor.NewHTTP(b.healthHandler, b.categoryHandler, b.productHandler,
-			b.cfg.Processor.WebServer)
+			b.cfg.Processor.WebServer, b.middlewares)
 
 		b.processors = append(b.processors, httpProcessor)
 	}, b.healthHandler)
