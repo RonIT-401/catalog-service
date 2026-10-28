@@ -44,6 +44,7 @@ func NewHTTP(
 	)
 
 	vGenericRegHealthCheck(r, hHealth)
+	vGenericRegPprof(r)
 
 	rV1 := r.PathPrefix("/v1").Subrouter()
 	v1RegCategoryHandler(rV1, hCategory)
@@ -82,5 +83,3 @@ func (p *httpProc) StartAsync(ctx context.Context, wg *sync.WaitGroup) {
 	processor.WatchForShutdown(ctx, wg, processor.CloserFunc(l.Close))
 	processor.WatchForShutdown(ctx, wg, processor.NewCloserContextFunc(p.server.Shutdown, context.Background(), time.Second*5))
 }
-
-// 93b92698-40dd-4f68-aa08-9511385d1ccd
